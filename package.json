@@ -4,7 +4,8 @@
   "description": "Conference Information Retrieval",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha ./test/**/*Tests.js"
+    "test": "./node_modules/.bin/mocha ./test/**/*Tests.js",
+    "download": "chmod +x ./download_datasets.sh && ./download_datasets.sh"
   },
   "keywords": [
     "CIR"
