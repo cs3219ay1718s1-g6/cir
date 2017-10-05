@@ -6,6 +6,8 @@ module.exports = class ExtractDataFilter extends Filter {
         let output = {
             titles: [],
             authors: [],
+            affiliations: [],
+            addresses: [],
             citations: []
         }
 
@@ -18,17 +20,13 @@ module.exports = class ExtractDataFilter extends Filter {
                 case 'ParsHed':
                     let data = algo.variant
                     // Add titles
-                    if (data.title.constructor === Array) {
-                        Array.prototype.push.apply(output.titles, data.title)
-                    } else if (data.title.constructor === Object) {
-                        output.titles.push(data.title)
-                    }
+                    appendData(output.titles, data.title)
                     // Add authors
-                    if (data.author.constructor === Array) {
-                        Array.prototype.push.apply(output.authors, data.author)
-                    } else if (data.author.constructor === Object) {
-                        output.authors.push(data.author)
-                    }
+                    appendData(output.authors, data.author)
+                    // Add affiliations
+                    appendData(output.affiliations, data.affiliation)
+                    // Add addresses
+                    appendData(output.addresses, data.address)
                     break
 
                 default:
@@ -38,5 +36,16 @@ module.exports = class ExtractDataFilter extends Filter {
         }
 
         return output
+    }
+}
+
+//-----------------------------------------------
+// Helper Methods
+//-----------------------------------------------
+const appendData = (array, data) => {
+    if (data.constructor === Array) {
+        Array.prototype.push.apply(array, data)
+    } else if (data.constructor === Object) {
+        array.push(data)
     }
 }
