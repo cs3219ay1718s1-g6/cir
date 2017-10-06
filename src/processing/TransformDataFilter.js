@@ -27,7 +27,7 @@ module.exports = class TransformDataFilter extends Filter {
                     .map(value => copyObjectExcludingKeys(value, ['valid']))
                     .map(value => {
                         let emptyKeys = Object.keys(value)
-                            .filter(k => value.hasOwnProperty(k))
+                            .filter(k => value.hasOwnProperty(k) && typeof value[k] !== 'undefined')
                             .filter(k => value[k].constructor === Object)
                             .filter(k => Object.keys(value[k]).length === 0)
                         return copyObjectExcludingKeys(value, emptyKeys)
