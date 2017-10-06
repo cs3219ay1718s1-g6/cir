@@ -2,12 +2,22 @@ const Filter = require('../architecture/Filter')
 
 module.exports = class ExtractDataFilter extends Filter {
     processData(jsonData) {
+        // Extract conference information
+        let conferenceId = jsonData.fileName.substring(0, jsonData.fileName.indexOf('-'))
+        let conferenceCode = conferenceId.replace(/[^A-Z]+/g, '')
+        let conferenceYear = 2000 + parseInt(conferenceId.replace(/[^0-9]+/g, ''))
+
         // Prepare the output data
         let output = {
+            conference: {
+                id: conferenceId,
+                code: conferenceCode,
+                year: conferenceYear,
+                name: ""
+            },
             titles: [],
+            notes: [],
             authors: [],
-            affiliations: [],
-            addresses: [],
             citations: []
         }
 
@@ -22,17 +32,22 @@ module.exports = class ExtractDataFilter extends Filter {
                     // Add titles
                     appendData(output.titles, data.title)
                     // Add authors
-                    appendData(output.authors, data.author)
+                    appendData(output.notes, data.note)
                     // Add affiliations
-                    appendData(output.affiliations, data.affiliation)
-                    // Add addresses
-                    appendData(output.addresses, data.address)
+                    appendData(output.authors, data.authors)
                     break
 
                 default:
                     // Do nothing
                     break
             }
+        }
+
+        if (output.notes.length > 0 &&
+            output.notes[0].constructor === Object &&
+            output.notes[0].hasOwnProperty('$t')) {
+
+            output.conference.name = output.notes[0].$t.trim().replace(/\s+[1-9]\d{0,3}$/, '')
         }
 
         return output

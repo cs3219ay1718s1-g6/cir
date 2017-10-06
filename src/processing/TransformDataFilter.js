@@ -6,12 +6,16 @@ module.exports = class TransformDataFilter extends Filter {
         for (let key of Object.keys(consolidatedData).filter(k => consolidatedData.hasOwnProperty(k))) {
             switch (key) {
                 case 'titles':
-                output.title = consolidatedData[key]
-                    .sort((a, b) => a.confidence - b.confidence)[0]
-                    .$t
+                if (consolidatedData[key].length === 0) {
+                    output.title = ""
+                } else {
+                    output.title = consolidatedData[key]
+                        // .sort((a, b) => a.confidence - b.confidence)[0]
+                        [0]
+                        .$t.replace(/\s+/g, ' ')
+                }
                 break
 
-                case 'addresses':
                 case 'authors':
                 output[key] = extractUniqueValues(
                     consolidatedData[key].map(value => value.$t)
@@ -20,7 +24,7 @@ module.exports = class TransformDataFilter extends Filter {
 
                 case 'citations':
                 output.citations = consolidatedData[key]
-                    .map(value => copyObjectExcludingKeys(value, ['valid', 'rawString']))
+                    .map(value => copyObjectExcludingKeys(value, ['valid']))
                     .map(value => {
                         let emptyKeys = Object.keys(value)
                             .filter(k => value.hasOwnProperty(k))
@@ -28,7 +32,15 @@ module.exports = class TransformDataFilter extends Filter {
                             .filter(k => Object.keys(value[k]).length === 0)
                         return copyObjectExcludingKeys(value, emptyKeys)
                     })
+                break
 
+                case 'conference':
+                // Copy as is
+                output[key] = consolidatedData[key]
+                break
+
+                default:
+                // Do nothing
                 break
             }
         }
