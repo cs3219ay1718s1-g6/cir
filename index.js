@@ -9,24 +9,6 @@ const rfs = require('rotating-file-stream');
 const Sequelize = require('sequelize');
 const webLogger = require('morgan');
 
-//* ---------- data processing ---------- *//
-const Pipeline = require('./src/architecture/Pipeline')
-const ReadFileFilter = require('./src/processing/ReadFileFilter')
-const XmlParseFilter = require('./src/processing/XmlParseFilter')
-const SanitizeDataFilter = require('./src/processing/SanitizeDataFilter')
-
-const dataFiles = fs.readdirSync(path.join(__dirname, 'datasets'))
-    .filter(file => /\.xml$/.test(file))
-
-const firstFile = path.join(__dirname, 'datasets', dataFiles[0])
-const pipeline = new Pipeline([
-    new ReadFileFilter(),
-    new XmlParseFilter(),
-    new SanitizeDataFilter(0.85)
-    ], data => console.log(JSON.stringify(data, null, 2)))
-pipeline.receiveData(firstFile)
-
-
 //* ---------- webserver routing ---------- *//
 const app = express();
 const invoker = require(__dirname + '/src/utils/invoker');
