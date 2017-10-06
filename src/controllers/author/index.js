@@ -7,8 +7,8 @@ var Author = Model.Author;
 module.exports = {
 
 	get:(req, res) => {
-		Author.getCount()
-			.then((count) => { res.status(200).send(count.toString()); });
+		Author.getCitedAuthorCount()
+			.then((count) => { console.log(count); });//res.status(200).send(count.toString()); });
 	},
 
 	post:(req, res) => {

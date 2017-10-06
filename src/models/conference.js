@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
   const Conference = sequelize.define('Conference', {
       UID: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       Name: { type: DataTypes.STRING, allowNull: false },
-      Code: { type: DataTypes.STRING, allowNull: false },
-      Year: { type: DataTypes.INTEGER, allowNull: false }
+      Alias: { type: DataTypes.STRING, allowNull: true },
+      Code: { type: DataTypes.STRING, allowNull: true }
   }, { tableName: "Conference" });
   
   Conference.associate = (models) => {

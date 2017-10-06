@@ -8,7 +8,8 @@ module.exports = {
 
 	get:(req, res) => {
 		Document.getCount()
-			.then((count) => { res.status(200).send(count.toString()); });
+			.then((count) => { res.status(200).send(count.toString()); })
+			.error((error) => { res.status(400).send(error); });
 	},
 
 	post:(req, res) => {

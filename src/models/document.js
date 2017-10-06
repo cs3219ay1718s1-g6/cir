@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
   const Document = sequelize.define('Document', {
       UID: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       Title: { type: DataTypes.STRING, allowNull: false },
+      Alias: { type: DataTypes.STRING, allowNull: true },
+      Year: { type: DataTypes.INTEGER, allowNull: true },
       IsInDataset: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue:false }
   }, { tableName: "Document" });
   
@@ -22,13 +24,11 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // Q1
-  Document.getCount = ({ }) => {
+  Document.getCount = () => {
     return new Promise((resolve, reject) => {
-        Document.count({
-            where: [{ 'ConferenceUID': { [Op.ne]:null } }]
-          }).then(count => {
-          resolve(count);
-        });
+        Document.count({ 'IsInDataset' : true })
+          .then((count) => { resolve(count); })
+          .error((error) => { reject(error); });
     });
   };
 
@@ -37,14 +37,13 @@ module.exports = (sequelize, DataTypes) => {
     return new Promise((resolve, reject) => {
         Document.max('Year', {  include: [{ model: Conference }] })
           .then((max) => {
-
               Document.min('Year', { include: [{ model: Conference }] })
                 .then((min) => {
                     let range = 0;
                     if(max > min) { range = max - min; }
                     resolve(range); 
                 });
-          }).error(function(error) { reject(error); });
+          }).error((error) => { reject(error); });
     });
   }
 

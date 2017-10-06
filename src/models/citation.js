@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   // Q2, Q3
   Citation.getCount = (unique) => {
     let distinct = {};
-    if(unique) { distinct = { 'distinct' : true, 'col': 'title' }; }
+    if(unique) { distinct = { 'distinct' : true, 'col': 'ToDocumentId' }; }
     return new Promise((resolve, reject) => {
         Citation.count(distinct).then(count => {
           resolve(count);
