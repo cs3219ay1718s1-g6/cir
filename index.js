@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const log4js = require('log4js');
 const rfs = require('rotating-file-stream');
+const Sequelize = require('sequelize');
 const webLogger = require('morgan');
 
 //* ---------- data processing ---------- *//
@@ -29,6 +30,7 @@ pipeline.receiveData(firstFile)
 //* ---------- webserver routing ---------- *//
 const app = express();
 const invoker = require(__dirname + '/src/utils/invoker');
+const models = require(__dirname + '/src/models');
 const logger = log4js.getLogger('cis');
 
 // configuring express to use body-parser as middle-ware.
