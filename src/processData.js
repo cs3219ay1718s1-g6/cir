@@ -1,13 +1,13 @@
 const fs = require('fs')
 const path = require('path')
-const DataProcessingPipeline = require('./src/processing/DataProcessingPipeline')
+const DataProcessingPipeline = require('./processing/DataProcessingPipeline')
 
 const DEBUG_MODE = false
 
-let fileNames = fs.readdirSync(path.join(__dirname, 'datasets'))
+let fileNames = fs.readdirSync(path.join(__dirname, '..', 'datasets'))
     .filter(name => /.xml$/.test(name))
 
-let outputDir = path.join(__dirname, 'processed')
+let outputDir = path.join(__dirname, '..', 'processed')
 
 if (DEBUG_MODE) {
 
@@ -15,11 +15,11 @@ if (DEBUG_MODE) {
         console.log(JSON.stringify(data, null, 4))
     })
     let randomIndex = Math.floor(Math.random() * fileNames.length)
-    pipeline.receiveData(path.join(__dirname, 'datasets', fileNames[randomIndex]))
+    pipeline.receiveData(path.join(__dirname, '..', 'datasets', fileNames[randomIndex]))
 
 } else {
     for (let fileName of fileNames) {
-        let filePath = path.join(__dirname, 'datasets', fileName)
+        let filePath = path.join(__dirname, '..', 'datasets', fileName)
         let pipeline = new DataProcessingPipeline(data => {
             console.log(data.title)
             for (let citation of data.citations) {
