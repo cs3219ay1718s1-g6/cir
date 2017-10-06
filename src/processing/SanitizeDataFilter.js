@@ -3,6 +3,7 @@ const Filter = require('../architecture/Filter')
 const FALSE_CITATION_AUTHORS = new Set([
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     ])
+const IGNORED_KEYS = new Set(["conference"])
 
 module.exports = class SanitizeDataFilter extends Filter {
     constructor(threshold) {
@@ -17,8 +18,16 @@ module.exports = class SanitizeDataFilter extends Filter {
 
     processData(consolidatedData) {
         let output = {}
-        Object.keys(consolidatedData).filter(k => consolidatedData.hasOwnProperty(k))
+        Object.keys(consolidatedData)
+            .filter(k => consolidatedData.hasOwnProperty(k))
             .forEach(k => {
+
+                // Process ignored keys first
+                if (IGNORED_KEYS.has(k)) {
+                    output[k] = consolidatedData[k]
+                    return
+                }
+
                 // Sanitize the data here
                 let sanitizedData = consolidatedData[k].filter(data => {
                     if (data.hasOwnProperty('confidence') && data.confidence < this._threshold) {
