@@ -43,7 +43,9 @@ module.exports = class ExtractDataFilter extends Filter {
 // Helper Methods
 //-----------------------------------------------
 const appendData = (array, data) => {
-    if (data.constructor === Array) {
+    if (typeof(data) === 'undefined') {
+        return
+    } else if (data.constructor === Array) {
         Array.prototype.push.apply(array, data)
     } else if (data.constructor === Object) {
         array.push(data)
