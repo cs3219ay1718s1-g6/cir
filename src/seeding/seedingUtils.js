@@ -23,10 +23,7 @@ module.exports = {
             }
             return component.charAt(0)
         })
-        .join(' ')
-        .reverse()
-        .substr(0, 255)
-        .reverse(),
+        .join(' '),
 
     performAsyncInBatches: (promiseGenerator, array, batchSize) => {
         let currentIndex = 0

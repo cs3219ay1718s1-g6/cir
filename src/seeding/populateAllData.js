@@ -18,8 +18,11 @@ let localConferenceMap = {}
 let dbConferenceMap = {}
 let localDocumentMap = {}
 let dbDocumentMap = {}
+let localAuthorMap = {}
+let dbAuthorMap = {}
 
 let docAliasToConfAliasMap = {}
+let docAliasToAuthorAbbrMap = {}
 
 // --------------
 // HELPER METHODS
@@ -37,6 +40,21 @@ const createLocalConference = (conference, overwrite = false) => {
             Name: conference.name,
             Code: conference.code
         })
+    }
+}
+
+const associateDocumentWithAuthors = (document) => {
+    if (document.hasOwnProperty('authors') &&
+        document.authors.constructor === Array &&
+        document.authors.length > 0 &&
+        document.hasOwnProperty('title')) {
+
+        let docAlias = getDocumentAlias(document.title)
+        if (!docAliasToAuthorAbbrMap.hasOwnProperty(docAlias)) {
+            docAliasToAuthorAbbrMap[docAlias] = new Set()
+        }
+        document.authors.map(a => getAuthorAbbr(a))
+            .forEach(abbr => docAliasToAuthorAbbrMap[docAlias].add(abbr))
     }
 }
 
@@ -73,7 +91,30 @@ const createLocalDocument = (document, overwrite = false) => {
             docAliasToConfAliasMap[alias] = confAlias
         }
     }
+
+    // Associate current document with authors
+    associateDocumentWithAuthors(document)
+
+    // Create new authors
+    if (document.hasOwnProperty('citations')) {
+        document.citations.filter(c => c.authors).map(c => c.authors)
+            .reduce((a, v) => a.concat(v), document.authors || [])
+            .forEach(author => {
+                let abbr = getAuthorAbbr(author)
+                if (!localAuthorMap.hasOwnProperty(abbr)) {
+                    localAuthorMap[abbr] = {
+                        Name: author,
+                        Abbreviation: abbr
+                    }
+                }
+            })
+
+        // Associate citations with authors
+        document.citations.forEach(c => associateDocumentWithAuthors(c))
+    }
+
 }
+
 
 const promiseProcessedData = () => Promise.resolve(collectProcessedData())
 
@@ -179,7 +220,42 @@ promiseProcessedData().then(documents => {
             ToDocumentId: b[1]
         }))), citations, 5000)
 }).then(_ => {
-    // Citations completed!
+    // Citations completed! Now onto authors
+    return performAsyncInBatches(batch => db.Author.bulkCreate(batch)
+        .then(authors => {
+            for (let author of authors) {
+                let authorAbbr = author.get({ plain: true }).Abbreviation
+                dbAuthorMap[authorAbbr] = author
+            }
+            return Promise.resolve()
+        }), Object.values(localAuthorMap), 5000)
+}).then(_ => {
+    // Local author map is no longer needed
+    localAuthorMap = null
+
+    // Turn these sets into arrays
+    Object.keys(docAliasToAuthorAbbrMap).filter(k => docAliasToAuthorAbbrMap.hasOwnProperty(k))
+        .forEach(key => {
+            docAliasToAuthorAbbrMap[key] = [...docAliasToAuthorAbbrMap[key].values()]
+        })
+
+    // Dump docAliasToAuthorAbbrMap to a file
+    // fs.writeFileSync('./databm.json', JSON.stringify(docAliasToAuthorAbbrMap, null, 2), 'utf8')
+
+    // At long last, we can create the document-author relationship
+    return performAsyncInBatches(batch => {
+        let promises = []
+        for (let documentAlias of batch) {
+            let document = dbDocumentMap[documentAlias]
+            let authorAbbrs = docAliasToAuthorAbbrMap[documentAlias]
+            let authors = authorAbbrs.map(a => dbAuthorMap[a])
+            promises.push(document.setAuthors(authors))
+        }
+        return Promise.all(promises)
+    }, Object.keys(docAliasToAuthorAbbrMap), 2000)
+
+}).then(_ => {
+    console.log("Done!")
 }).catch(err => console.error(err))
 
 
