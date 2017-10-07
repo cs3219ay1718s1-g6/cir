@@ -2,12 +2,14 @@ const log4js = require('log4js');
 const logger = log4js.getLogger('backend');
 
 var Model = require('../../models');
-var Citation = Model.Citation;
+var Document = Model.Document;
 
 module.exports = {
 
 	get:(req, res) => {
-		res.sendStatus(501);
+		Document.getCitedDocumentRange()
+			.then((count) => { res.status(200).send(count.toString()); })
+			.catch((error) => { res.status(400).send(error); });;
 	},
 
 	post:(req, res) => {

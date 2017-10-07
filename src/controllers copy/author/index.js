@@ -2,7 +2,7 @@ const log4js = require('log4js');
 const logger = log4js.getLogger('backend');
 
 var Model = require('../../models');
-var Citation = Model.Citation;
+var Author = Model.Author;
 
 module.exports = {
 

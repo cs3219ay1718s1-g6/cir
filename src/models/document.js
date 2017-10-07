@@ -80,36 +80,75 @@ module.exports = (sequelize, DataTypes) => {
     });
   }
 
-  Document.retrieveCodeAndYear = (conference) => {
-    let code = conference.substring(0, 1);
-    let year = conference.substring(1, 2);
-    return { code, year };
+  // Q7 - 
+  Document.getCountByMutipleTitles = (conference, name) => {
+
+
+    return new Promise((resolve, reject) => {
+      name = name.toLowerCase();
+      let names = name.split(",");
+
+      conference = conference.toUpperCase();
+      let conferenceCode = conference.substring(0,1);
+      let conferenceYear = '20' + conference.substring(1);
+
+      console.log(conference);
+
+      let query = names.map(name => `C2.Alias LIKE '%${name}%'`)
+            .map(cond => `(${cond})`).join(" OR ");
+
+      sequelize.query("SELECT C2.Alias alias, COUNT(*) count " + 
+                      "FROM Document as D1, Document as D2, Conference as C1, Conference as C2, Citation as Ci " + 
+                      "WHERE D1.UID = Ci.FromDocumentID AND " + 
+                      "D2.UID = Ci.ToDocumentID AND " + 
+                      "D1.ConferenceUID = C1.UID AND " + 
+                      "C1.Code ='" + conferenceCode + "' AND D1.Year =" + conferenceYear + " AND " + 
+                      "D2.ConferenceUID = C2.UID AND (" + 
+                      query + ") " +
+                      "GROUP BY C2.Alias"
+      ).then(data => { 
+            data = data[0];
+            let result = {};
+            names.forEach((item, index) => { result[item] = 0; });
+            
+            data.forEach((item, index) => {
+                let alias = item.alias;
+                let count = item.count;
+                names.forEach((name) => {
+                  if(alias.toLowerCase().indexOf(name) != -1) {
+                    result[name] += count;
+                    return;
+                  }
+                });
+            });
+            resolve(result); 
+        }).catch(error => { reject(error); });
+      });
   }
 
-
-  // Q7, Q10 - title and dataset are in set of arrays
+  // Q10 - title and dataset are in set of arrays
   Document.getCountByTitle = (conference, name) => {
 
     return new Promise((resolve, reject) => {
 
+        name = name.toLowerCase();
         conference = conference.toUpperCase();
         let conferences = conference.split(",");
         let query = conferences.map(conf => conf.match(/^([A-Z]+)(\d+)$/).slice(1, 3))
-          .map(([code, yearString]) => `Co.Code = '${code}' AND D1.Year = 20${yearString}`)
+          .map(([code, yearString]) => `C1.Code = '${code}' AND D1.Year = 20${yearString}`)
           .map(cond => `(${cond})`).join(" OR ");
 
         sequelize.query(
-                        "SELECT C1.Code, D1.Year, COUNT(*) " +
+                        "SELECT C1.Code code, D1.Year year, COUNT(*) count " +
                         "FROM Document as D1, Document as D2, Conference as C1, Conference as C2, Citation as Ci " +
                         "WHERE D1.UID = Ci.FromDocumentID AND D2.UID = Ci.ToDocumentID AND " + 
-                        "D1.ConferenceUID = C1.UID AND D2.ConferenceUID = C2.UID AND " +
-                        "((C1.Code = 'J' AND D1.Year = 2014) OR " +
-                        "(C1.Code = 'W' AND D1.Year = 2014)) AND " +
-                        "C2.Alias LIKE '%naacl%' " +
+                        "D1.ConferenceUID = C1.UID AND D2.ConferenceUID = C2.UID AND (" +
+                        query + ") " +
+                        "AND C2.Alias LIKE '%" + name + "%' " +
                         "GROUP BY C1.Code, D1.Year")
         .then(data => { 
-         /// data = data[0];
-          //data.forEach((item, index) => { item.conference = item.code + item.conferenceYear.toString().substring(2); }); 
+          data = data[0];
+          data.forEach((item, index) => { item.conference = item.code + item.year.toString().substring(2); }); 
           resolve(data); 
         })
         .catch(error => { reject(error); });

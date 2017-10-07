@@ -7,9 +7,7 @@ var Document = Model.Document;
 module.exports = {
 
 	get:(req, res) => {
-		Document.getCount()
-			.then((count) => { res.status(200).send(count.toString()); })
-			.catch((error) => { res.status(400).send(error); });
+		res.sendStatus(501);
 	},
 
 	post:(req, res) => {
