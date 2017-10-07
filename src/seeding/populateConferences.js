@@ -1,5 +1,11 @@
 const collectProcessedData = require('./collectProcessedData')
 
+const getConferenceAlias = (conference) => conference
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z\s]+/g, '')
+    .replace(/\s+/g, ' ')
+
 const conferences = collectProcessedData()
     .map(jsonData => {
         let conf = []
@@ -14,7 +20,7 @@ const conferences = collectProcessedData()
     })
     .reduce((a, v) => a.concat(v))
     .map(c => Object.assign({}, c, {
-        Alias: c.Name.trim().toLowerCase().replace(/[^a-z\s]+/g, '').replace(/\s+/g, ' ')
+        Alias: getConferenceAlias(c.Name)
     }))
     .sort((a, b) => a.Alias.localeCompare(b.Alias))
     .reduce((a, v) => {
@@ -27,6 +33,10 @@ const conferences = collectProcessedData()
 // Preparing for database connection
 const db = require('../models/index')
 
-for (let conference of conferences.slice(0, 10)) {
+for (let conference of conferences) {
     db.Conference.create(conference).then(response => console.log(response))
+}
+
+module.exports = {
+    getConferenceAlias
 }
