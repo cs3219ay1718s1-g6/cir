@@ -58,19 +58,37 @@ const associateDocumentWithAuthors = (document) => {
     }
 }
 
+const getDocumentYear = (document) => {
+    if (document.hasOwnProperty('conference') &&
+        document.conference.constructor === Object &&
+        document.conference.hasOwnProperty('year')) {
+
+        return document.conference.year
+    }
+
+    if (document.hasOwnProperty('date') &&
+        document.date.constructor === Number) {
+
+        return document.date
+    }
+
+    return undefined
+}
+
 const createLocalDocument = (document, overwrite = false) => {
     let alias = getDocumentAlias(document.title)
     if (!localDocumentMap.hasOwnProperty(alias)) {
         localDocumentMap[alias] = {
             Alias: alias,
             Title: document.title,
-            Year: document.year,
+            Year: getDocumentYear(document),
             IsInDataset: overwrite
         }
+
     } else if (overwrite) {
         localDocumentMap[alias] = Object.assign({}, localDocumentMap[alias], {
             Title: document.title,
-            Year: document.year,
+            Year: getDocumentYear(document),
             IsInDataset: true
         })
     }
