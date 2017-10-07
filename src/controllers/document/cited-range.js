@@ -7,9 +7,9 @@ var Document = Model.Document;
 module.exports = {
 
 	get:(req, res) => {
-		Document.getCount()
+		Document.getCitedDocumentRange()
 			.then((count) => { res.status(200).send(count.toString()); })
-			.catch((error) => { res.status(400).send(error); });
+			.catch((error) => { res.status(400).send(error); });;
 	},
 
 	post:(req, res) => {

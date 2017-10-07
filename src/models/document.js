@@ -33,17 +33,21 @@ module.exports = (sequelize, DataTypes) => {
   };
 
   // Q5
-  Document.getRange = () => {
+  Document.getCitedDocumentRange = () => {
     return new Promise((resolve, reject) => {
-        Document.max('Year', {  include: [{ model: Conference }] })
-          .then((max) => {
-              Document.min('Year', { include: [{ model: Conference }] })
-                .then((min) => {
-                    let range = 0;
-                    if(max > min) { range = max - min; }
-                    resolve(range); 
-                });
-          }).error((error) => { reject(error); });
+        sequelize.query("SELECT max(d.Year) max, min(d.Year) min FROM Document d, Citation c " +  
+                        "WHERE c.ToDocumentId = d.UID")
+          .then(data => { 
+              data = data[0][0];
+              let min = data.min;
+              let max = data.max;
+
+              if((min && max) && (max >= min)) {
+                let range = max - min;
+                resolve(range);
+              } else { reject('Failed to retrieve values.')}
+         
+          }).catch(error => { reject(error); });
     });
   }
 
@@ -52,7 +56,15 @@ module.exports = (sequelize, DataTypes) => {
   Document.getCountByYearRange = (conference, startYear, endYear) => {
     return new Promise((resolve, reject) => {
 
-        resolve('test');
+        /*sequelize.query(
+                        "SELECT d.Year year, count(*) citations FROM Citation c, Document d " + 
+                        "WHERE d.UID = c.ToDocumentId " +
+
+                        "GROUP BY Year")
+        .then(data => {
+            console.log(data);
+            resolve("test");
+        });*/
     });
   }
 

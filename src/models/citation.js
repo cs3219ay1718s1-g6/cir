@@ -27,14 +27,5 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  // Q8
-  Citation.getCountByAuthorWithYearRange = (author, startYear, endYear) => {
-    
-    return new Promise((resolve, reject) => {
-          
-        resolve('test');
-    });
-  }
-
   return Citation;
 };

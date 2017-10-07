@@ -8,9 +8,9 @@ module.exports = {
 
 	get:(req, res) => {
 		let unique = req.query.unique;
-		console.log(unique);
 		Citation.getCount(unique)
-			.then((count) => { res.status(200).send(count.toString()); });
+			.then((count) => { res.status(200).send(count.toString()); })
+			.catch((error) => { res.status(400).send(error); });;
 	},
 
 	post:(req, res) => {

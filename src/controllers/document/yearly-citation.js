@@ -7,8 +7,13 @@ var Document = Model.Document;
 module.exports = {
 
 	get:(req, res) => {
-		Document.getRange()
-			.then((count) => { res.status(200).send(count.toString()); });
+		let conferences = req.query.conferences;
+		let startYear = req.query.startYear;
+		let endYear = req.query.endYear;
+
+		Document.getCountByYearRange(conferences, startYear, endYear)
+			.then((count) => { res.status(200).send(count.toString()); })
+			.catch((error) => { res.status(400).send(error); });
 	},
 
 	post:(req, res) => {
