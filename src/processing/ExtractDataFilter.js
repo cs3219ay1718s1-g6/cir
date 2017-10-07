@@ -66,7 +66,8 @@ const appendData = (array, data) => {
 
 const extractCitations = (citations) => citations.constructor === Array ? citations.map(citation => {
     let output = {
-        confidence: citation.confidence
+        confidence: citation.confidence,
+        original: citation.rawString
     }
     if (citation.hasOwnProperty('authors')) {
         // Add authors
