@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
   // Q1
   Document.getCount = () => {
     return new Promise((resolve, reject) => {
-        Document.count({ 'IsInDataset' : true })
+        Document.count({ where: { 'IsInDataset' : true}  })
           .then((count) => { resolve(count); })
           .error((error) => { reject(error); });
     });
