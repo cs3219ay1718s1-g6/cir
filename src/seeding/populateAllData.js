@@ -154,6 +154,32 @@ promiseProcessedData().then(documents => {
     // Can now free up memory from doc alias to conf alias map
     docAliasToConfAliasMap = null
 
+    // Start constructing citation map
+    let citations = []
+
+    for (let document of processedDocuments) {
+        let fromDoc = dbDocumentMap[getDocumentAlias(document.title)]
+        if (typeof fromDoc === 'undefined') {
+            continue
+        }
+        let fromDocId = fromDoc.get({ plain: true }).UID
+
+        let toDocIds = document.citations
+            .filter(c => c.title)
+            .map(c => getDocumentAlias(c.title))
+            .filter(a => dbDocumentMap.hasOwnProperty(a))
+            .map(a => dbDocumentMap[a].get({ plain: true }).UID)
+
+        Array.prototype.push.apply(citations, toDocIds.map(t => [fromDocId, t]))
+    }
+
+    // Save these to the database
+    return performAsyncInBatches(batch => db.Citation.bulkCreate(batch.map(b => ({
+            FromDocumentId: b[0],
+            ToDocumentId: b[1]
+        }))), citations, 5000)
+}).then(_ => {
+    // Citations completed!
 }).catch(err => console.error(err))
 
 
