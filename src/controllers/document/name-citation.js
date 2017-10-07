@@ -8,17 +8,16 @@ module.exports = {
 
 	get:(req, res) => {
 		let conference = req.query.conference;
-		let startYear = req.query.startYear;
-		let endYear = req.query.endYear;
+		let name = req.query.name;
 
-		let conferences = conference.split(",");
-		let hasMany = conferences.length > 1;
+		let names = name.split(",");
+		let hasMany = names.length > 1;
 
-		Document.getCountByYearRange(conference, startYear, endYear)
+		Document.getCountByTitle(conference, name)
 			.then((data) => { 
-				var result;
-				result = data.map(item => `${ hasMany ? item.conference : '' } ${ item.citedYear } ${ item.count }` ).join(", ");
-				res.status(200).send(result); 
+				//var result;
+				//result = data.map(item => `${ hasMany ? item.conference : '' } ${ item.citedYear } ${ item.count }` ).join(", ");
+				res.status(200).send(data); 
 			})
 			.catch((error) => { res.status(400).send(error); });
 	},
